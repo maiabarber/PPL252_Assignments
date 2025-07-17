@@ -1,0 +1,108 @@
+(define list?
+  (lambda (x)
+    (if (eq? x '())
+        #t
+        (if (pair? x)
+            (list? (cdr x))
+            #f))))
+
+(define map
+  (lambda (f lst)
+    (if (eq? lst '())
+        '()
+        (if (not (pair? lst))
+            (make-error "map: malformed list")
+            (cons (f (car lst)) (map f (cdr lst)))))))
+
+(define member
+  (lambda (x lst)
+    (if (not (symbol? x))
+        (make-error "member: x must be a symbol")
+        (if (eq? lst '())
+            #f
+            (if (not (pair? lst))
+                (make-error "member: malformed list")
+                (if (eq? x (car lst))
+                    #t
+                    (member x (cdr lst))))))))
+
+(define has-duplicates?
+  (lambda (lst)
+    (if (not (list? lst))
+        (make-error "has-duplicates?: input is not a list")
+        (if (eq? lst '())
+            #f
+            (if (not (pair? lst))
+                #f
+                (if (not (pair? (cdr lst)))
+                    #f
+                    (if (not (pair? (car lst)))
+                        (make-error "has-duplicates?: element is not a pair")
+                        (if (member (car (car lst))
+                                    (if (not (pair? (cdr lst)))
+                                        '()
+                                        (map (lambda (p)
+                                               (if (pair? p)
+                                                   (car p)
+                                                   (make-error "has-duplicates?: element is not a pair")))
+                                             (cdr lst))))
+                            #t
+                            (has-duplicates? (cdr lst))))))))))
+
+(define dict
+  (lambda (pairs)
+    (if (not (dict? pairs))
+        (make-error "dict: input is not a valid dictionary structure")
+        (if (has-duplicates? pairs)
+            (make-error "duplicate key")
+            pairs))))
+
+
+(define get
+  (lambda (d k)
+    (if (not (dict? d))
+        (make-error "get: input is not a valid dictionary")
+        (if (not (symbol? k))
+            (make-error "get: key must be a symbol")
+            (if (or (eq? d '()) (not (pair? d)))
+                (make-error "key not found")
+                (if (not (pair? (car d)))
+                    (make-error "get: malformed dictionary entry")
+                    (if (eq? (car (car d)) k)
+                        (cdr (car d))
+                        (get (cdr d) k))))))))
+
+(define dict?
+  (lambda (x)
+    (if (eq? x '())
+        #t
+        (if (not (pair? x))
+            #f
+            (if (not (pair? (car x)))
+                #f
+                (if (not (symbol? (car (car x))))
+                    #f
+                    (and (not (has-duplicates? x)) (dict? (cdr x)))))))))
+
+
+(define make-error
+  (lambda (msg)
+    (if (string? msg)
+        (list 'error msg)
+        (list 'error "make-error: msg must be a string"))))
+
+
+(define is-error?
+  (lambda (v)
+    (if (pair? v)
+        (if (eq? (car v) 'error)
+            #t
+            #f)
+        #f)))
+
+
+(define bind
+  (lambda (v f)
+    (if (is-error? v)
+        v
+        (f v))))
