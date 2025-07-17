@@ -39,9 +39,8 @@ This repository contains all four assignments submitted for the course **PPL252 
 ---
 
 ## 🧪 Running Each Assignment
-
-Each folder contains its own README (if needed) and setup instructions.  
-Navigate to the relevant folder and follow instructions inside.
+Each assignment folder contains code and resources.
+If a specific README or instructions file is missing, refer to the assignment PDF included or follow standard procedures to run .pl, .py, or .cpp files as appropriate.
 
 ---
 
